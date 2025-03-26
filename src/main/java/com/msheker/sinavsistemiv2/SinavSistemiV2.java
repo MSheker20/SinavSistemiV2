@@ -33,6 +33,9 @@ public class SinavSistemiV2 {
                 5. Ogrenciye Ders Ekle
                 6. Ogrenci Ortalama Hesapla
                 7. 60'dan Kucuk Sinav Notlari
+                8. Ders Ortalamasi Üstünde Olan Ogrenciler
+                9. En İyi Notlar
+                10. Ortalamaya Göre Ogrencileri Sirala
                 0. Cikis
 
                 Merhaba, lutfen yapmak istediginiz islemi seciniz:""");
