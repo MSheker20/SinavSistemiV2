@@ -70,6 +70,7 @@ public class Ogrenci {
         }
         return null; // Ogrenci bulunamazsa null doner
     }
+    
     @Override
     public String toString() {
         String result = "Ogrenci No: " + this.no + ", Ad: " + this.ad;
@@ -89,4 +90,18 @@ public class Ogrenci {
         
         return result;
     }
+
+        // Ogrencinin tum derslerinin ortalamasini hesaplayan metod
+        public double tumDersOrtalamaHesapla(){
+            double toplam = 0;
+            
+            if (this.dersler.isEmpty()) {
+                return 0; // Ders yoksa ortalama 0
+            }
+            
+            for (int i = 0; i < this.dersler.size(); i++) {
+                toplam += dersler.get(i).getOrtalama();
+            }
+            return toplam / this.dersler.size();
+        }
 }

@@ -89,7 +89,7 @@ public class SinavSistemiV2 {
                         System.out.println("Belirtilen numaraya sahip ogrenci bulunamadi!");
                         break;
                     }
-                    System.out.println(seciliOgrenci.getAd() + " isimli ogrencinin ortalamasi: " + tumDersOrtalamaHesapla(seciliOgrenci));
+                    System.out.println(seciliOgrenci.getAd() + " isimli ogrencinin ortalamasi: " + seciliOgrenci.tumDersOrtalamaHesapla());
                 }
                 
                 case 7 -> { // 60'dan kucuk notları yazdırır
@@ -97,25 +97,31 @@ public class SinavSistemiV2 {
                     System.out.println("Lutfen notlarini gormek istediginiz dersin adini giriniz: ");
                     String dersAdi = scanner.nextLine();
                     Ders seciliDers = Ders.dersBul(dersler, dersAdi);
-                    if (seciliDers == null) {
-                        System.out.println("Belirtilen isimde ders bulunamadi!");
-                        break;
-                    }else{
-                        for(int i = 0; i < ogrenciler.size(); i++){
-                            Ogrenci o = ogrenciler.get(i);
-                            for(int j = 0; j < o.getDersler().size(); j++) {
-                                Ders d = o.getDersler().get(j);
-                                if(d.getAd().equals(seciliDers.getAd())) {
-                                    if(d.getVizeNot() < 60) {
-                                        System.out.println(d.getAd() + " dersinden vize notu 60'dan kucuk olan ogrenci: " + o.getAd() 
-                                                          + ", Vize Notu: " + d.getVizeNot());
-                                    }
-                                    // Final notu için benzer kontrol
-                                }
-                            }
-                        }
-                    }
+                    altmisdanKucukNotlar(ogrenciler, seciliDers);
                 }
+
+                case 8 -> { // ders ortalamasinin ustunde olan ogrenciler
+                    dersListesiniGoster(dersler);
+                    System.out.print("Lutfen ortalamasini karsilastirmak istediginiz dersin adini giriniz: ");
+                    Ders seciliDers = Ders.dersBul(dersler, scanner.nextLine());
+
+                    dersOrtalamaKarsilastir(ogrenciler, seciliDers);
+                }
+
+                case 9 -> { // en iyi notları yazdırır
+                    dersListesiniGoster(dersler);
+                    System.out.print("Lutfen en iyi notlari gormek istediginiz dersin adini giriniz: ");
+                    String dersAdi = scanner.nextLine();
+                    Ders seciliDers = Ders.dersBul(dersler, dersAdi);
+                    
+                    enIyiNotlar(ogrenciler, seciliDers);
+                }
+
+                case 10 -> { //ortalamya göre sıralar
+                    System.out.println("----Ortalamasina Göre Sirali Ogrenci Listesi----");
+                    ortalamayaGoreSirala(ogrenciler);
+                }
+
                 case 0 -> { // Cikis
                     devam = false;
                     System.out.println("Program sonlandiriliyor...");
@@ -173,21 +179,6 @@ public class SinavSistemiV2 {
         }
     }
     
-    // Ogrencinin tum derslerinin ortalamasini hesaplayan metod
-    private static double tumDersOrtalamaHesapla(Ogrenci o){
-        double toplam = 0;
-        ArrayList<Ders> dersler = o.getDersler();
-        
-        if (dersler.isEmpty()) {
-            return 0; // Ders yoksa ortalama 0
-        }
-        
-        for (int i = 0; i < dersler.size(); i++) {
-            toplam += dersler.get(i).getOrtalama();
-        }
-        return toplam / dersler.size();
-    }
-    
     // Ogrenciye ders ekleme metodu
     private static void ogrenciyeDersEkle(ArrayList<Ogrenci> ogrenciler, ArrayList<Ders> dersler, Scanner scanner) {
         ogrenciListesiniGoster(ogrenciler);
@@ -233,5 +224,121 @@ public class SinavSistemiV2 {
         
         System.out.println("Ders ekleme işlemi tamamlandi.");
         System.out.println("Öğrenci bilgileri: \n" + seciliOgrenci.toString());
+    }
+
+    // 60'dan kucuk notlari yazdiran metod
+    private static void altmisdanKucukNotlar(ArrayList<Ogrenci> ogrenciler, Ders seciliDers) {
+        if (seciliDers == null) {
+            System.out.println("Belirtilen isimde ders bulunamadi!");
+        }else{
+            for(int i = 0; i < ogrenciler.size(); i++){
+                Ogrenci o = ogrenciler.get(i);
+                for(int j = 0; j < o.getDersler().size(); j++) {
+                    Ders d = o.getDersler().get(j);
+                    if(d.getAd().equals(seciliDers.getAd())) {
+                        if(d.getVizeNot() < 60) {
+                            System.out.println(d.getAd() + " dersinden vize notu 60'dan kucuk olan ogrenci: " + o.getAd() 
+                                              + ", Vize Notu: " + d.getVizeNot());
+                        }
+                        if(d.getFinalNot() < 60) {
+                            System.out.println(d.getAd() + " dersinden final notu 60'dan kucuk olan ogrenci: " + o.getAd() 
+                                              + ", Final Notu: " + d.getFinalNot());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Ders ortalamasinin ustunde olan ogrencileri yazdiran metod
+    private static void dersOrtalamaKarsilastir(ArrayList<Ogrenci> ogrenciler, Ders seciliDers) {
+        if (seciliDers == null) {
+            System.out.println("Belirtilen isimde ders bulunamadi");
+        }
+        else {
+            double dersToplam = 0;
+            int ogrenciSayisi = 0;
+            
+            // Dersin tüm öğrenciler arasındaki ortalamasını hesapla
+            for(int i = 0; i < ogrenciler.size(); i++){
+                Ogrenci o = ogrenciler.get(i);
+                for(int j = 0; j < o.getDersler().size(); j++) {
+                    Ders d = o.getDersler().get(j);
+                    if(d.getAd().equals(seciliDers.getAd())){
+                        dersToplam += d.getOrtalama();
+                        ogrenciSayisi++;
+                    }
+                }
+            }
+            
+            // Eğer hiç öğrenci yoksa hata mesajı göster
+            if(ogrenciSayisi == 0) {
+                System.out.println("Bu dersi alan öğrenci bulunmamaktadır.");
+                return;
+            }
+            
+            double dersOrtalama = dersToplam / ogrenciSayisi;
+            System.out.println(seciliDers.getAd() + " dersinin genel ortalaması: " + dersOrtalama);
+            
+            // Ortalama üstü öğrencileri bul
+            for(int i = 0; i < ogrenciler.size(); i++){
+                Ogrenci o = ogrenciler.get(i);
+                for(int j = 0; j < o.getDersler().size(); j++) {
+                    Ders d = o.getDersler().get(j);
+                    if(d.getAd().equals(seciliDers.getAd())){
+                        if (d.getOrtalama() > dersOrtalama) {
+                            System.out.println("Ders ortalamasinin ustunde olan ogrenci: " + o.getAd() + 
+                                              ", Aldigi Not: " + d.getOrtalama());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Ortalamaya göre sıralayan metod
+    private static void ortalamayaGoreSirala(ArrayList<Ogrenci> ogrenciler){
+        for(int i = 0; i < ogrenciler.size(); i++) {
+            for (int j = i + 1; j < ogrenciler.size(); j++) {
+                if (ogrenciler.get(i).dersOrtalama() < ogrenciler.get(j).dersOrtalama()) {
+                    Ogrenci temp = ogrenciler.get(i);
+                    ogrenciler.set(i, ogrenciler.get(j));
+                    ogrenciler.set(j, temp);
+                }
+            }
+        }
+        for (int i = 0; i < ogrenciler.size(); i++) {
+            Ogrenci o = ogrenciler.get(i);
+            System.out.println((i+1) + ". Ogrenci No: " + o.getNo() + ", Ad: " + o.getAd() + ", Ortalama: " + o.dersOrtalama());
+        }
+    }
+
+    // En iyi notları yazdıran metod
+    private static void enIyiNotlar(ArrayList<Ogrenci> ogrenciler, Ders seciliDers) {
+        if (seciliDers == null) {
+            System.out.println("Belirtilen isimde ders bulunamadi");
+        } else {
+            double enIyiNot = 0;
+            String enIyiOgrenci = "";
+            
+            for(int i = 0; i < ogrenciler.size(); i++){
+                Ogrenci o = ogrenciler.get(i);
+                for(int j = 0; j < o.getDersler().size(); j++) {
+                    Ders d = o.getDersler().get(j);
+                    if(d.getAd().equals(seciliDers.getAd())){
+                        if(d.getOrtalama() > enIyiNot) {
+                            enIyiNot = d.getOrtalama();
+                            enIyiOgrenci = o.getAd();
+                        }
+                    }
+                }
+            }
+            if (enIyiOgrenci.isEmpty()) {
+                System.out.println("Bu dersi alan öğrenci bulunmamaktadır.");
+            } else {
+                System.out.println(seciliDers.getAd() + " dersinde en iyi notu alan ogrenci: " + enIyiOgrenci + 
+                                  ", Notu: " + enIyiNot);
+            }
+        }
     }
 }
